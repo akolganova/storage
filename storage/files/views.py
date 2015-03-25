@@ -51,7 +51,7 @@ def _upload(request, file):
 
 
 def download(request, uuid):
-    upload = get_object_or_404(Upload, uuid=uuid, user=request.user)
+    upload = get_object_or_404(Upload, uuid=uuid)
     response = HttpResponse(FileWrapper(upload.file), content_type=upload.content_type)
     response['Content-Disposition'] = 'attachment; filename=%s' % upload.name
     return response
