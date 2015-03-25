@@ -6,16 +6,11 @@ import hashlib
 
 class UploadManager(models.Manager):
     def get_with_file(self, file):
-        for matching_upload in self._filter_with_file(file):
+        matching_uploads = self.filter(md5sum=_md5(file))
+        for matching_upload in matching_uploads:
             if matching_upload.is_same_file(file):
                 return matching_upload
         return None
-
-    def count_with_file(self, file):
-        return self._filter_with_file(file).count()
-
-    def _filter_with_file(self, file):
-        return self.filter(md5sum=_md5(file))
 
 
 class Upload(models.Model):
@@ -35,7 +30,7 @@ class Upload(models.Model):
 
     @transaction.atomic
     def delete(self, *args, **kwargs):
-        if Upload.objects.count_with_file(self.file) == 1:
+        if Upload.objects.filter(file=self.file).count() == 1:
             self.file.delete()
         super(Upload, self).delete(*args, **kwargs)
 
