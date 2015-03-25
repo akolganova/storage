@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{% block title %}{% endblock %} | Storage</title>
+     </head>
+    <body>
+        <ul>
+            <li><a href="{% url 'index' %}">Storage</a></li>
+            {% if not user.is_authenticated %}
+            <li><a href="{% url 'register' %}">Register</a></li>
+            <li><a href="{% url 'login' %}">Log in</a></li>
+            {% endif %}
+            {% if user.is_authenticated %}
+            <li><a href="{% url 'logout' %}">Log out</a></li>
+            {% endif %}
+        </ul>
+
+        {% if user.is_authenticated %}
+        <p>Hi {{ user.username }}!</p>
+        {% endif %}
+
+        {% if messages %}
+        <h2>Messages</h2>
+        <ul class="messages">
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </body>
+</html>

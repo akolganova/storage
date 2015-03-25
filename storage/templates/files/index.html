@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Files{% endblock %}
+
+{% block content %}
+
+<h1>Upload a New File</h1>
+
+{% if matching_upload %}
+<p>
+    <strong>Duplicate detected</strong><br/>
+    {{ matching_upload.user }} has already uploaded the same file named "{{ matching_upload.name }}"
+</p>
+{% endif %}
+
+<form method="post" action="" enctype="multipart/form-data">
+    {% csrf_token %}
+    <p>{{ form.non_field_errors }}</p>
+    <p>
+        {{ form.file.label_tag }}
+        {{ form.file.errors }}
+        {{ form.file }}
+        <input type="submit" value="Upload"/>
+    </p>
+</form>
+
+<h1>Files</h1>
+{% if uploads %}
+<ul>
+{% for upload in uploads %}
+    <li> <a href="/files/downloads/{{upload.uuid}}">{{ upload.name }}</a> <a href="/files/delete/{{upload.uuid}}"> delete</a></li>
+{% endfor %}
+</ul>
+{% else %}
+<p>You have no files</p>
+{% endif %}
+
+
+{% endblock %}

@@ -1,0 +1,6 @@
+/media/
+*.pyc
+__pycache__
+.idea
+*.iml
+/db.sqlite3
