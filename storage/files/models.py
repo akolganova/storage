@@ -1,16 +1,21 @@
 from django.contrib.auth.models import User
 from django.core.files import File
-from django.db import models
+from django.db import models, transaction
 import hashlib
 
 
 class UploadManager(models.Manager):
     def get_with_file(self, file):
-        matching_uploads = self.filter(md5sum=_md5(file))
-        for matching_upload in matching_uploads:
+        for matching_upload in self._filter_with_file(file):
             if matching_upload.is_same_file(file):
                 return matching_upload
         return None
+
+    def count_with_file(self, file):
+        return self._filter_with_file(file).count()
+
+    def _filter_with_file(self, file):
+        return self.filter(md5sum=_md5(file))
 
 
 class Upload(models.Model):
@@ -27,6 +32,12 @@ class Upload(models.Model):
         if not self.pk:
             self.md5sum = _md5(self.file)
         super(Upload, self).save(*args, **kwargs)
+
+    @transaction.atomic
+    def delete(self, *args, **kwargs):
+        if Upload.objects.count_with_file(self.file) == 1:
+            self.file.delete()
+        super(Upload, self).delete(*args, **kwargs)
 
     def is_same_file(self, file):
         return self._file_cmp(self.file, file)

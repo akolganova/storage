@@ -8,8 +8,9 @@ from storage.files.models import Upload
 from django.core.servers.basehttp import FileWrapper
 import uuid
 from django.contrib import messages
+from django.db import transaction
 
-FILE_LIMIT = 6
+FILE_LIMIT = 100
 
 
 @login_required
@@ -17,7 +18,8 @@ def index(request, template_name):
     if request.method == 'POST':
         form = FileUploadForm(request.POST, request.FILES)
         if form.is_valid():
-            _upload(request, request.FILES['file'])
+            with transaction.atomic():
+                _upload(request, request.FILES['file'])
             return HttpResponseRedirect(reverse('storage.files.views.index'))
     else:
         form = FileUploadForm()
@@ -57,6 +59,7 @@ def download(request, uuid):
 
 @login_required
 def delete(request, uuid):
-    upload = get_object_or_404(Upload, uuid=uuid, user=request.user)
-    upload.delete()
+    with transaction.atomic():
+        upload = get_object_or_404(Upload, uuid=uuid, user=request.user)
+        upload.delete()
     return HttpResponseRedirect(reverse('storage.files.views.index'))
