@@ -9,8 +9,9 @@ from django.core.servers.basehttp import FileWrapper
 import uuid
 from django.contrib import messages
 from django.db import transaction
+from django.conf import settings
 
-FILE_LIMIT = 100
+DEFAULT_FILE_LIMIT = 100
 
 
 @login_required
@@ -28,8 +29,9 @@ def index(request, template_name):
 
 
 def _check_file_limit(request):
-    if Upload.objects.filter(user=request.user).count() >= FILE_LIMIT:
-        messages.add_message(request, messages.ERROR, 'You have reached the limit of %s files' % FILE_LIMIT)
+    file_limit = getattr(settings, 'FILE_LIMIT', DEFAULT_FILE_LIMIT)
+    if Upload.objects.filter(user=request.user).count() >= file_limit:
+        messages.add_message(request, messages.ERROR, 'You have reached the limit of %s files' % file_limit)
         return True
     return False
 

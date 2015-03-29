@@ -94,3 +94,4 @@ STATIC_URL = '/static/'
 
 
 LOGIN_REDIRECT_URL = '/'
+FILE_LIMIT = 100

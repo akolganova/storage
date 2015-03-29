@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.core.files import File
 from django.db import models, transaction
 import hashlib
+import uuid
 
 
 class UploadManager(models.Manager):
@@ -17,7 +18,7 @@ class Upload(models.Model):
     user = models.ForeignKey(User)
     file = models.FileField(upload_to='%Y/%m/%d')
     name = models.CharField(max_length=256)
-    uuid = models.CharField(max_length=256)
+    uuid = models.CharField(max_length=256, unique=True, default=uuid.uuid1)
     content_type = models.CharField(max_length=256, blank=True)
     md5sum = models.CharField(max_length=32)
 
@@ -30,9 +31,9 @@ class Upload(models.Model):
 
     @transaction.atomic
     def delete(self, *args, **kwargs):
-        if Upload.objects.filter(file=self.file).count() == 1:
-            self.file.delete()
         super(Upload, self).delete(*args, **kwargs)
+        if Upload.objects.filter(file=self.file).count() == 0:
+            self.file.delete(save=False)
 
     def is_same_file(self, file):
         return self._file_cmp(self.file, file)
